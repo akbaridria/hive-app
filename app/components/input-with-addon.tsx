@@ -1,14 +1,14 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { HTMLInputTypeAttribute, useId } from "react";
+import React, { HTMLInputTypeAttribute, useId } from "react";
 
 interface InputWithAddonProps {
   label: string;
   placeholder: string;
   type: HTMLInputTypeAttribute;
-  suffix?: string;
-  prefix?: string;
+  suffix?: string | React.ReactNode;
+  prefix?: string | React.ReactNode;
   disabled?: boolean;
 }
 
@@ -18,7 +18,7 @@ const InputWithAddon: React.FC<InputWithAddonProps> = ({
   type,
   prefix,
   suffix,
-  disabled
+  disabled,
 }) => {
   const id = useId();
   return (
@@ -27,7 +27,7 @@ const InputWithAddon: React.FC<InputWithAddonProps> = ({
       <div className="relative">
         <Input
           id={id}
-          className={cn("peer", { "ps-6": prefix, "pe-10": suffix })}
+          className={cn("peer", { "ps-10": prefix, "pe-10": suffix })}
           placeholder={placeholder}
           type={type}
           disabled={disabled}

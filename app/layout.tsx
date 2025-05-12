@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/header";
+import { Web3Provider } from "../components/web3-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,19 +30,21 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-         <div className="flex flex-col h-screen">
-         <Header />
-          <main className="container mx-auto border-x border-dashed flex-1 flex flex-col">
-            {children}
-          </main>
-         </div>
-        </ThemeProvider>
+        <Web3Provider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="flex flex-col h-screen">
+              <Header />
+              <main className="container mx-auto border-x border-dashed flex-1 flex flex-col">
+                {children}
+              </main>
+            </div>
+          </ThemeProvider>
+        </Web3Provider>
       </body>
     </html>
   );
