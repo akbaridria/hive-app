@@ -7,17 +7,38 @@ import {
   Wallet2Icon,
   DropletIcon,
   PlusIcon,
+  LoaderIcon,
 } from "lucide-react";
 import { useConnectModal } from "@xellar/kit";
-import { useAccount, useSwitchChain, useChainId } from "wagmi";
+import {
+  useAccount,
+  useSwitchChain,
+  useWaitForTransactionReceipt,
+  useWriteContract,
+} from "wagmi";
 import { SUPPORTED_CHAIN_IDS } from "@/config/constant";
-import { useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
+import config from "@/config";
+import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
+import { Label } from "./ui/label";
+import AbiErc20 from "@/config/abis/erc20.json";
+import { useChainConnection } from "@/store";
+import { toast } from "sonner";
 
 const Header = () => {
   const { open } = useConnectModal();
-  const { isConnected } = useAccount();
-  const chainId = useChainId();
+  const { isConnected, chainId } = useAccount();
   const { switchChain } = useSwitchChain();
+  const setConnected = useChainConnection((state) => state.setConnected);
 
   useEffect(() => {
     if (!isConnected || !chainId) return;
@@ -25,10 +46,14 @@ const Header = () => {
     if (!SUPPORTED_CHAIN_IDS.includes(chainId)) {
       switchChain({ chainId: SUPPORTED_CHAIN_IDS[0] });
     }
-  }, [isConnected, chainId, switchChain]);
+
+    if (isConnected && SUPPORTED_CHAIN_IDS.includes(chainId)) {
+      setConnected(true);
+    }
+  }, [isConnected, chainId, switchChain, setConnected]);
 
   const isRightConnected = useMemo(
-    () => isConnected && SUPPORTED_CHAIN_IDS.includes(chainId),
+    () => isConnected && SUPPORTED_CHAIN_IDS.includes(chainId || 0),
     [isConnected, chainId]
   );
 
@@ -46,10 +71,7 @@ const Header = () => {
             )}
             {isRightConnected && (
               <>
-                <Button variant="outline">
-                  <DropletIcon />
-                  <span className="hidden md:inline">Faucet</span>
-                </Button>
+                <ButtonFaucet />
                 <Button variant="outline">
                   <PlusIcon />
                   <span className="hidden md:inline">Add new pair</span>
@@ -68,6 +90,94 @@ const Header = () => {
         </div>
       </div>
     </div>
+  );
+};
+
+const listTokens = Object.values(config.tokens);
+
+const ButtonFaucet = () => {
+  const [txHash, setTxhash] = useState<string>("");
+  const [selectedToken, setSelectedToken] = useState(listTokens[0].ca);
+  const { writeContract, isPending } = useWriteContract();
+
+  const { isLoading } = useWaitForTransactionReceipt({
+    hash: txHash as `0x${string}`,
+    confirmations: 1,
+    query: {
+      select(data) {
+        if (data.status === "success") {
+          toast.success("Token minted successfully!");
+        } else {
+          toast.error("Token minting failed.");
+        }
+        setTxhash("");
+      },
+    },
+  });
+
+  const handleFaucet = useCallback(() => {
+    writeContract(
+      {
+        address: selectedToken as `0x${string}`,
+        abi: AbiErc20,
+        functionName: "mint",
+        args: [],
+      },
+      {
+        onSuccess: (hash) => {
+          setTxhash(hash);
+        },
+        onError: (error) => {
+          toast.error(
+            `Error minting token: ${error.message.slice(0, 30) || "Unknown"}`
+          );
+        },
+      }
+    );
+  }, [selectedToken, writeContract]);
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <DropletIcon />
+          <span className="hidden md:inline">Faucet</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Faucet</DialogTitle>
+          <DialogDescription>
+            Get free BTC, IDRX, DummyX & DummyY tokens to test the app.
+          </DialogDescription>
+        </DialogHeader>
+        <RadioGroup
+          defaultValue={selectedToken}
+          onValueChange={(value) => {
+            setSelectedToken(value);
+          }}
+        >
+          {listTokens.map((token) => (
+            <div key={token.ca} className="flex items-center space-x-2">
+              <RadioGroupItem value={token.ca} id={token.ca} />
+              <Label htmlFor={token.ca}>{token.name}</Label>
+            </div>
+          ))}
+        </RadioGroup>
+        <DialogFooter>
+          <Button
+            type="button"
+            onClick={handleFaucet}
+            disabled={isPending || isLoading}
+          >
+            {(isPending || isLoading) && (
+              <LoaderIcon className="animate-spin" />
+            )}
+            {isPending || isLoading ? "Loading..." : "Get Token"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

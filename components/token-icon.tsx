@@ -1,9 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
+import { tokenImages } from "@/config/constant";
 import { HelpCircle } from "lucide-react";
-const tokenImages: Record<string, string> = {
-  btc: "/tokens/bitcoin-btc-logo.svg",
-  "0x456...def": "https://example.com/token2.png",
-};
 
 export const TokenIcon = ({
   address,
