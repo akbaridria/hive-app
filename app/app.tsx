@@ -4,7 +4,7 @@ import { ResizablePanelGroup, ResizableHandle, ResizablePanel } from "@/componen
 import ListPair from "./components/list-pair";
 import OrderBook from "./components/order-book";
 import PairInfo from "./components/pair-info";
-import PlaceOrder from "./components/place-order";
+import OrderHistory from "./components/order-history";
 
 const App = () => {
   return (
@@ -17,7 +17,7 @@ const App = () => {
           <ResizablePanelGroup direction="vertical">
             <OrderBook />
             <ResizableHandle withHandle />
-            <PlaceOrder />
+            <OrderHistory />
           </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
