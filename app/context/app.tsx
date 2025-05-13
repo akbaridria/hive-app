@@ -1,28 +1,19 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { PoolInfo } from "../types";
 
-// Type for the pair
-export type Pair = {
-  id: number;
-  pairName: string;
-  latestPrice: string;
-  isFavorite: boolean;
-  icon: string;
-};
-
-// Type for context value
 type SelectedPairContextType = {
-  selectedPair: Pair | null;
-  setSelectedPair: (pair: Pair) => void;
+  selectedPair: PoolInfo | undefined;
+  setSelectedPair: (pair: PoolInfo | undefined) => void;
 };
 
-// Create context
-const SelectedPairContext = createContext<SelectedPairContextType | undefined>(undefined);
+const SelectedPairContext = createContext<SelectedPairContextType | undefined>(
+  undefined
+);
 
-// Provider component
-export const SelectedPairProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedPair, setSelectedPair] = useState<Pair | null>(null);
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const [selectedPair, setSelectedPair] = useState<PoolInfo | undefined>(undefined);
 
   return (
     <SelectedPairContext.Provider value={{ selectedPair, setSelectedPair }}>
@@ -31,11 +22,12 @@ export const SelectedPairProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Hook to use context
-export const useSelectedPair = () => {
+export const useAppContext = () => {
   const context = useContext(SelectedPairContext);
   if (!context) {
-    throw new Error("useSelectedPair must be used within a SelectedPairProvider");
+    throw new Error(
+      "useAppContext must be used within a AppProvider"
+    );
   }
   return context;
 };

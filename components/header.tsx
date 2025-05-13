@@ -8,6 +8,7 @@ import {
   DropletIcon,
   PlusIcon,
   LoaderIcon,
+  Hexagon,
 } from "lucide-react";
 import { useConnectModal } from "@xellar/kit";
 import {
@@ -61,7 +62,10 @@ const Header = () => {
     <div className="sticky top-0 z-50 border-b border-dashed bg-background/50 backdrop-blur-sm backdrop-filter">
       <div className="container mx-auto border-x border-dashed">
         <div className="flex items-center justify-between p-4">
-          <div>Hive Logo</div>
+          <div className="flex items-center gap-2">
+            <Hexagon className="h-8 w-8 text-primary" />
+            <h1 className="text-2xl font-bold">hive</h1>
+          </div>
           <div className="flex items-center gap-2">
             {!isRightConnected && (
               <Button variant="outline" onClick={open}>
