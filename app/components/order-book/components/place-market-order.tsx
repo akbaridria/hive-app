@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import InputWithAddon from "../../input-with-addon";
+import InputWithAddon from "../../currency-input";
 
 const PlaceMarketOrder = () => {
   return (
@@ -16,14 +16,10 @@ const BuyMarketOrder = () => {
       <InputWithAddon
         label="From amount"
         placeholder="0.00"
-        type="text"
-        suffix="IDRX"
       />
       <InputWithAddon
         label="To amount"
         placeholder="0.00"
-        type="text"
-        suffix="BTC"
         disabled={true}
       />
       <div className="text-xs space-y-1">
@@ -45,14 +41,10 @@ const SellLimitOrder = () => {
       <InputWithAddon
         label="From amount"
         placeholder="0.00"
-        type="text"
-        suffix="BTC"
       />
       <InputWithAddon
         label="To amount"
         placeholder="0.00"
-        type="text"
-        suffix="IDRX"
       />
       <div className="text-xs space-y-1">
         <div>

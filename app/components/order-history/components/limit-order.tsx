@@ -2,12 +2,23 @@ import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import EmptyOrder from "./empty-order";
-import { Order } from "@/app/types";
-
-const orders: Order[] = [];
+import { useGetUserLimitOrders } from "@/api/query/pools";
+import { useAppContext } from "@/app/context/app";
+import { useAccount } from "wagmi";
+import { formatCurrency } from "@/lib/utils";
 
 const LimitOrder = () => {
-  if (orders.length === 0) return <EmptyOrder />;
+  const { selectedPair } = useAppContext();
+  const { address } = useAccount();
+
+  const { data } = useGetUserLimitOrders(
+    selectedPair?.address as string,
+    address as string
+  );
+
+  console.log("data", data);
+
+  if (data?.length === 0) return <EmptyOrder />;
   return (
     <>
       <div className="grid grid-cols-12 gap-2 px-2 py-2 text-xs font-medium text-muted-foreground border-b">
@@ -20,7 +31,7 @@ const LimitOrder = () => {
       </div>
 
       <div className="space-y-1 mt-2">
-        {orders.map((order) => (
+        {data?.map((order) => (
           <div
             key={order.id}
             className="grid grid-cols-12 gap-2 px-2 py-2 text-sm rounded-md hover:bg-muted/50 transition-colors"
@@ -39,9 +50,15 @@ const LimitOrder = () => {
                 {order.orderType}
               </span>
             </div>
-            <div className="col-span-2 font-medium">{order.price}</div>
-            <div className="col-span-2">{order.amount}</div>
-            <div className="col-span-2">{order.filled}</div>
+            <div className="col-span-2 font-medium">
+              {formatCurrency(Number(order.price || 0))}
+            </div>
+            <div className="col-span-2">
+              {formatCurrency(Number(order.amount || 0))}
+            </div>
+            <div className="col-span-2">
+              {formatCurrency(Number(order.filled || 0))}
+            </div>
             <div className="col-span-2 flex items-center gap-2">
               {order.remainingAmount}
               {order.active && (

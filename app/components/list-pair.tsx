@@ -23,7 +23,7 @@ interface ListPairProps {
 const ListPair: React.FC<ListPairProps> = ({ listPools }) => {
   const { selectedPair, setSelectedPair } = useAppContext();
   const [searchPair, setSearchPair] = useState("");
-  const [selectedTab, setSelectedTab] = useState(tabs[0]);
+  const [selectedTab, setSelectedTab] = useState(tabs[1]);
   const search = useDebounce(searchPair, 500);
 
   const filteredPools = listPools.filter(

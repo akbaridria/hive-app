@@ -1,60 +1,45 @@
 "use client";
 
+import { useGetOrderBook } from "@/api/query/pools";
+import { useAppContext } from "@/app/context/app";
+import type { OrderBook } from "@/app/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { BarChart3 } from "lucide-react";
 import { useMemo } from "react";
 
-const dummyOrderBook = {
-  baseToken: {
-    symbol: "ETH",
-    name: "Ethereum",
-    decimals: 18,
-    address: "0xBaseTokenAddress",
-  },
-  quoteToken: {
-    symbol: "USDT",
-    name: "Tether",
-    decimals: 6,
-    address: "0xQuoteTokenAddress",
-  },
-  latestPrice: "2000",
-  bids: [
-    { price: "1995", orders: [], totalVolume: "10" },
-    { price: "1990", orders: [], totalVolume: "15" },
-    { price: "1985", orders: [], totalVolume: "20" },
-    { price: "1980", orders: [], totalVolume: "25" },
-    { price: "1975", orders: [], totalVolume: "30" },
-    { price: "1970", orders: [], totalVolume: "35" },
-    { price: "1965", orders: [], totalVolume: "40" },
-    { price: "1960", orders: [], totalVolume: "45" },
-    { price: "1955", orders: [], totalVolume: "50" },
-    { price: "1950", orders: [], totalVolume: "55" },
-  ],
-  asks: [
-    { price: "2005", orders: [], totalVolume: "12" },
-    { price: "2010", orders: [], totalVolume: "18" },
-    { price: "2015", orders: [], totalVolume: "24" },
-    { price: "2020", orders: [], totalVolume: "30" },
-    { price: "2025", orders: [], totalVolume: "36" },
-    { price: "2030", orders: [], totalVolume: "42" },
-    { price: "2035", orders: [], totalVolume: "48" },
-    { price: "2040", orders: [], totalVolume: "54" },
-    { price: "2045", orders: [], totalVolume: "60" },
-    { price: "2050", orders: [], totalVolume: "66" },
-  ],
-};
-
 const OrderBook = () => {
+  const { selectedPair } = useAppContext();
+  const { data } = useGetOrderBook(selectedPair?.address || "");
+
   const maxBidVolume = useMemo(() => {
     return Math.max(
-      ...dummyOrderBook.bids.map((bid) => Number.parseFloat(bid.totalVolume))
+      ...(data?.bids || []).map((bid) => Number.parseFloat(bid.totalVolume))
     );
-  }, []);
+  }, [data]);
 
   const maxAskVolume = useMemo(() => {
     return Math.max(
-      ...dummyOrderBook.asks.map((ask) => Number.parseFloat(ask.totalVolume))
+      ...(data?.asks || []).map((ask) => Number.parseFloat(ask.totalVolume))
     );
-  }, []);
+  }, [data]);
+
+  const EmptyOrderBook = () => (
+    <div className="h-full flex flex-col items-center justify-center text-center p-6 space-y-4">
+      <div className="bg-muted/30 rounded-full p-2 w-10 h-10 flex items-center justify-center">
+        <BarChart3 className="h-8 w-8 text-muted-foreground" />
+      </div>
+      <div className="space-y-2">
+        <h4 className="text-lg font-medium">No Order Book Data</h4>
+        <p className="text-sm text-muted-foreground max-w-[250px]">
+          There are currently no orders in the order book for this trading pair.
+        </p>
+      </div>
+    </div>
+  );
+
+  if (!data?.bids.length && !data?.asks.length) {
+    return <EmptyOrderBook />;
+  }
 
   return (
     <div className="h-full p-4 space-y-4">
@@ -65,7 +50,7 @@ const OrderBook = () => {
             <div className="text-muted-foreground">Price(IDRX)</div>
             <div className="text-muted-foreground text-right">Amount(BTC)</div>
           </div>
-          {dummyOrderBook.bids.map((bid, index) => {
+          {data.bids.map((bid, index) => {
             const volumePercentage =
               (Number.parseFloat(bid.totalVolume) / maxBidVolume) * 100;
 
@@ -85,8 +70,8 @@ const OrderBook = () => {
               </div>
             );
           })}
-          <div className="text-lg font-semibold">1990</div>
-          {dummyOrderBook.asks.map((ask, index) => {
+          <div className="text-lg font-semibold">{data.latestPrice}</div>
+          {data.asks.map((ask, index) => {
             const volumePercentage =
               (Number.parseFloat(ask.totalVolume) / maxAskVolume) * 100;
 

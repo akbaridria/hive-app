@@ -34,6 +34,25 @@ import { Label } from "./ui/label";
 import AbiErc20 from "@/config/abis/erc20.json";
 import { useChainConnection } from "@/store";
 import { toast } from "sonner";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "./ui/form";
+import { useForm } from "react-hook-form";
+import { Input } from "./ui/input";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { createPublicClient, erc20Abi, http } from "viem";
+import { readContract } from "viem/actions";
+import { liskSepolia } from "viem/chains";
+import hiveFactoryAbi from "@/config/abis/hive-factory.json";
+import { useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/api/constant/query-keys";
 
 const Header = () => {
   const { open } = useConnectModal();
@@ -76,10 +95,7 @@ const Header = () => {
             {isRightConnected && (
               <>
                 <ButtonFaucet />
-                <Button variant="outline">
-                  <PlusIcon />
-                  <span className="hidden md:inline">Add new pair</span>
-                </Button>
+                <ButtonCreatePair />
               </>
             )}
             <div className="flex items-center">
@@ -180,6 +196,240 @@ const ButtonFaucet = () => {
             {isPending || isLoading ? "Loading..." : "Get Token"}
           </Button>
         </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+const formSchema = z.object({
+  baseToken: z.string().min(2, {
+    message: "Base token address must be at least 2 characters.",
+  }),
+});
+
+const ButtonCreatePair = () => {
+  const [open, setOpen] = useState(false);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isTokenValid, setIsTokenValid] = useState<boolean | null>(null);
+  const { writeContract, isPending } = useWriteContract();
+  const [txHash, setTxhash] = useState<string>("");
+
+  const queryClient = useQueryClient();
+
+  const { isLoading } = useWaitForTransactionReceipt({
+    hash: txHash as `0x${string}`,
+    confirmations: 1,
+    query: {
+      select(data) {
+        if (data.status === "success") {
+          toast.success("Pool created successfully!");
+          closeModal();
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: [queryKeys.POOLS] });
+          }, 1500);
+        } else {
+          toast.error("Pool created failed.");
+        }
+        setTxhash("");
+      },
+    },
+  });
+
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      baseToken: "",
+    },
+  });
+
+  async function validateToken(address: string): Promise<boolean> {
+    if (!address || address.length < 2) return false;
+
+    setIsValidating(true);
+    setIsTokenValid(null);
+
+    try {
+      const isValid = address.startsWith("0x") && address.length >= 42;
+      if (!isValid) {
+        setIsTokenValid(false);
+        return false;
+      }
+      await readContract(
+        createPublicClient({ chain: liskSepolia, transport: http() }),
+        {
+          address: address as `0x${string}`,
+          abi: erc20Abi,
+          functionName: "name",
+        }
+      );
+      return true;
+    } catch (error) {
+      console.error("Error validating token:", error);
+      setIsTokenValid(false);
+      return false;
+    } finally {
+      setIsValidating(false);
+    }
+  }
+
+  const closeModal = useCallback(() => {
+    setOpen(false);
+    form.reset();
+    setIsTokenValid(null);
+  }, [form]);
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (isTokenValid !== true) {
+      const isValid = await validateToken(values.baseToken);
+      if (!isValid) return;
+    }
+
+    writeContract(
+      {
+        address: config.factoryAddress as `0x${string}`,
+        abi: hiveFactoryAbi,
+        functionName: "createHiveCore",
+        args: [values.baseToken, config.tokens.idrx.ca],
+      },
+      {
+        onSuccess: (hash) => {
+          setTxhash(hash);
+        },
+        onError: (error) => {
+          toast.error(
+            `Error creating pool ${error.message.slice(0, 30) || "Unknown"}`
+          );
+        },
+      }
+    );
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline">
+          <PlusIcon />
+          <span className="hidden md:inline">Add new pair</span>
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create New Liquidity Pair</DialogTitle>
+          <DialogDescription>
+            Enter the base token address to create a new liquidity pair with
+            IDRX.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="baseToken"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Base Token</FormLabel>
+                  <div className="relative">
+                    <FormControl>
+                      <Input
+                        placeholder="Enter token address"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+                          setIsTokenValid(null);
+                        }}
+                        className={`pr-10 ${
+                          isTokenValid === true
+                            ? "border-green-500 focus-visible:ring-green-500"
+                            : isTokenValid === false
+                            ? "border-red-500 focus-visible:ring-red-500"
+                            : ""
+                        }`}
+                      />
+                    </FormControl>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {isValidating && (
+                        <LoaderIcon className="animate-spin" size={16} />
+                      )}
+                      {!isValidating && isTokenValid === true && (
+                        <div className="text-green-500">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-check-circle"
+                          >
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                          </svg>
+                        </div>
+                      )}
+                      {!isValidating && isTokenValid === false && (
+                        <div className="text-red-500">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="lucide lucide-x-circle"
+                          >
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <FormDescription>
+                    Enter the contract address of your base token.
+                  </FormDescription>
+                  {isTokenValid === false &&
+                    !form.formState.errors.baseToken && (
+                      <p className="text-sm font-medium text-red-500">
+                        Invalid token address format.
+                      </p>
+                    )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-center gap-2 rounded-md border p-2 bg-muted/50 text-sm">
+              <div className="font-medium">Quote Token:</div>
+              <div className="text-muted-foreground">IDRX</div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={
+                  isValidating ||
+                  form.formState.isSubmitting ||
+                  isPending ||
+                  isLoading
+                }
+              >
+                {form.formState.isSubmitting || isPending || isLoading ? (
+                  <>
+                    <LoaderIcon className="animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Pair"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

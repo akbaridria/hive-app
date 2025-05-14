@@ -11,6 +11,8 @@ export const TokenIcon = ({
   size?: number;
 }) => {
   const imageUrl = tokenImages[address];
+  console.log("imageUrl", imageUrl);
+  console.log("address", address);
   const renderBaseToken = useMemo(() => {
     if (imageUrl)
       return (

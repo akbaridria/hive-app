@@ -8,7 +8,7 @@ const fetchOrderbookById = (id: string) =>
 const fetchOrderById = (poolId: string, orderId: string) =>
   apiClient.get(`/pools/${poolId}/orders/${orderId}`).then((res) => res.data);
 const fetchUserLimitOrders = (poolId: string, trader: string) =>
-  apiClient.get(`/pools/${poolId}/${trader}/user`).then((res) => res.data);
+  apiClient.get(`/pools/${poolId}/${trader}/orders`).then((res) => res.data);
 const fetchUserMarketOrders = (poolId: string, trader: string) =>
   apiClient
     .get(`/pools/${poolId}/${trader}/market-orders`)
