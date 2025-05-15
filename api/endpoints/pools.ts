@@ -1,3 +1,4 @@
+import { OrderType } from "@/app/types";
 import { apiClient } from "../client";
 
 const fetchAllPools = () => apiClient.get("/pools").then((res) => res.data);
@@ -13,7 +14,7 @@ const fetchUserMarketOrders = (poolId: string, trader: string) =>
   apiClient
     .get(`/pools/${poolId}/${trader}/market-orders`)
     .then((res) => res.data);
-const getAmountOut = (poolId: string, orderType: string, amount: string) =>
+const getAmountOut = (poolId: string, orderType: OrderType, amount: string) =>
   apiClient
     .get(`/pools/${poolId}/get-amount-out`, {
       params: {

@@ -4,9 +4,18 @@ import {
   fetchOrderbookById,
   fetchPoolById,
   fetchUserLimitOrders,
+  fetchUserMarketOrders,
+  getAmountOut,
 } from "@/api/endpoints/pools";
 import { queryKeys } from "@/api/constant/query-keys";
-import { Order, OrderBook, PoolInfo } from "@/app/types";
+import {
+  AmountOutResult,
+  MarketOrder,
+  Order,
+  OrderBook,
+  OrderType,
+  PoolInfo,
+} from "@/app/types";
 
 const useGetAllPools = () => {
   return useQuery<PoolInfo[], Error>({
@@ -28,6 +37,7 @@ const useGetOrderBook = (id: string) => {
     queryKey: [queryKeys.ORDERBOOK(id)],
     queryFn: () => fetchOrderbookById(id),
     enabled: !!id,
+    refetchInterval: 5000,
   });
 };
 
@@ -35,7 +45,28 @@ const useGetUserLimitOrders = (id: string, trader: string) => {
   return useQuery<Order[], Error>({
     queryKey: [queryKeys.USER_LIMIT_ORDERS(id, trader)],
     queryFn: () => fetchUserLimitOrders(id, trader),
-    // enabled: !!id && !!trader,
+    refetchInterval: 5000,
+  });
+};
+
+const useGetAmountOut = (
+  poolId: string,
+  orderType: OrderType,
+  amount: string
+) => {
+  return useQuery<AmountOutResult, Error>({
+    queryKey: [queryKeys.GET_AMOUNT_OUT],
+    queryFn: () => getAmountOut(poolId, orderType, amount),
+    enabled: !!amount,
+  });
+};
+
+const useGetUserMarketOrders = (poolId: string, trader: string) => {
+  return useQuery<MarketOrder[], Error>({
+    queryKey: [queryKeys.USER_MARKET_ORDERS(poolId, trader)],
+    queryFn: () => fetchUserMarketOrders(poolId, trader),
+    enabled: !!poolId && !!trader,
+    refetchInterval: 5000,
   });
 };
 
@@ -44,4 +75,6 @@ export {
   useGetPoolById,
   useGetOrderBook,
   useGetUserLimitOrders,
+  useGetAmountOut,
+  useGetUserMarketOrders,
 };

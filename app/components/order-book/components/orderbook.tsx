@@ -4,6 +4,7 @@ import { useGetOrderBook } from "@/api/query/pools";
 import { useAppContext } from "@/app/context/app";
 import type { OrderBook } from "@/app/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { formatCurrency } from "@/lib/utils";
 import { BarChart3 } from "lucide-react";
 import { useMemo } from "react";
 
@@ -63,14 +64,18 @@ const OrderBook = () => {
                   className="absolute inset-0 bg-green-500/20 z-0"
                   style={{ width: `${volumePercentage}%` }}
                 />
-                <div className="text-green-500 relative z-10">{bid.price}</div>
+                <div className="text-green-500 relative z-10">
+                  {formatCurrency(Number(bid.price || 0))}
+                </div>
                 <div className="text-right relative z-10">
-                  {bid.totalVolume}
+                  {formatCurrency(Number(bid.totalVolume || 0))}
                 </div>
               </div>
             );
           })}
-          <div className="text-lg font-semibold">{data.latestPrice}</div>
+          <div className="text-lg font-semibold">
+            {formatCurrency(Number(data.latestPrice || 0))}
+          </div>
           {data.asks.map((ask, index) => {
             const volumePercentage =
               (Number.parseFloat(ask.totalVolume) / maxAskVolume) * 100;
@@ -84,9 +89,11 @@ const OrderBook = () => {
                   className="absolute inset-0 bg-red-500/20 z-0"
                   style={{ width: `${volumePercentage}%` }}
                 />
-                <div className="text-red-500 relative z-10">{ask.price}</div>
+                <div className="text-red-500 relative z-10">
+                  {formatCurrency(Number(ask.price || 0))}
+                </div>
                 <div className="text-right relative z-10">
-                  {ask.totalVolume}
+                  {formatCurrency(Number(ask.totalVolume || 0))}
                 </div>
               </div>
             );

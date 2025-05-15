@@ -4,6 +4,7 @@ import { StarIcon } from "lucide-react";
 import { useAppContext } from "../context/app";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { setItem } from "@/lib/local-storage";
+import { formatCurrency } from "@/lib/utils";
 
 const PairInfo = () => {
   const { selectedPair } = useAppContext();
@@ -55,8 +56,8 @@ const PairInfo = () => {
         </div>
         <div>
           <div className="text-xs text-right">Latest Price</div>
-          <div className=" font-bold tracking-wider">
-            {selectedPair?.latestPrice}
+          <div className=" font-bold tracking-wider text-right">
+            {formatCurrency(Number(selectedPair?.latestPrice || 0))}
           </div>
         </div>
       </div>

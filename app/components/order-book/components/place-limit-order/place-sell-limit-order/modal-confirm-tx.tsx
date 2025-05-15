@@ -20,10 +20,6 @@ import ApproveTransaction from "./approve-transaction";
 interface IModalConfirmationTxProps {
   price: number | null;
   amount: number | null;
-  total: {
-    original: number;
-    display: number;
-  } | null;
   baseDecimal: number;
   quoteDecimal: number;
 }
@@ -31,7 +27,6 @@ interface IModalConfirmationTxProps {
 const ModalConfirmationTx: React.FC<IModalConfirmationTxProps> = ({
   price,
   amount,
-  total,
   baseDecimal,
   quoteDecimal,
 }) => {
@@ -41,13 +36,13 @@ const ModalConfirmationTx: React.FC<IModalConfirmationTxProps> = ({
   const { selectedPair } = useAppContext();
 
   const { data: allowance, refetch } = useReadContract({
-    address: selectedPair?.quoteToken.address as `0x${string}`,
+    address: selectedPair?.baseToken.address as `0x${string}`,
     abi: erc20Abi,
     functionName: "allowance",
     args: [address!, selectedPair?.address as `0x${string}`],
     query: {
-        refetchInterval: 1500,
-    }
+      refetchInterval: 1500,
+    },
   });
 
   useEffect(() => {
@@ -71,26 +66,26 @@ const ModalConfirmationTx: React.FC<IModalConfirmationTxProps> = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          className="w-full bg-green-500 hover:bg-green-600 text-white"
+          className="w-full bg-red-500 hover:bg-red-600 text-white"
           disabled={!price || !amount}
         >
-          Buy
+          Sell
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[625px]">
         <DialogHeader>
-          <DialogTitle>Confirm Buy Limit Order</DialogTitle>
+          <DialogTitle>Confirm Sell Limit Order</DialogTitle>
         </DialogHeader>
         <div className="max-w-screen-sm mx-auto p-6">
           <div className="relative ml-4">
             <div className="absolute left-0 inset-y-0 border-l-2" />
 
             <ApproveTransaction
-              quoteTokenAddress={
-                selectedPair?.quoteToken.address as `0x${string}`
+              baseTokenAddress={
+                selectedPair?.baseToken.address as `0x${string}`
               }
               pairAddress={selectedPair?.address as `0x${string}`}
-              amount={total?.original || 0}
+              amount={(amount || 0) * 10 ** baseDecimal || 0}
               onApproveSuccess={handleApproveSuccess}
               disabled={!price || !amount}
               onApproveError={() => setIsApproved(false)}
@@ -121,8 +116,7 @@ const ModalConfirmationTx: React.FC<IModalConfirmationTxProps> = ({
               </div>
               <div className="text-sm text-muted-foreground">Total</div>
               <div className="text-sm font-medium text-right">
-                {formatCurrency(total?.display || 0)}{" "}
-                {selectedPair?.quoteToken.symbol}
+                {formatCurrency(amount || 0)} {selectedPair?.baseToken.symbol}
               </div>
             </div>
           </div>

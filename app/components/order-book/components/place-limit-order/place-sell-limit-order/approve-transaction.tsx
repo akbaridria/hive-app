@@ -10,7 +10,7 @@ import { erc20Abi } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 interface ApproveTransactionProps {
-  quoteTokenAddress: `0x${string}`;
+  baseTokenAddress: `0x${string}`;
   pairAddress: `0x${string}`;
   amount: number;
   onApproveSuccess: () => void;
@@ -21,7 +21,7 @@ interface ApproveTransactionProps {
 }
 
 const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
-  quoteTokenAddress,
+  baseTokenAddress,
   pairAddress,
   amount,
   onApproveSuccess,
@@ -61,7 +61,7 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
   const handleApprove = useCallback(() => {
     writeContract(
       {
-        address: quoteTokenAddress,
+        address: baseTokenAddress,
         abi: erc20Abi,
         functionName: "approve",
         args: [pairAddress, BigInt(amount)],
@@ -76,7 +76,7 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
         },
       }
     );
-  }, [writeContract, quoteTokenAddress, pairAddress, amount, onApproveError]);
+  }, [writeContract, baseTokenAddress, pairAddress, amount, onApproveError]);
 
   return (
     <div className="relative pl-10 pb-12">
@@ -95,7 +95,8 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
         </div>
         <p className="text-sm text-muted-foreground">
           Approve the token transfer for the limit order, ensuring that the
-          contract can access the specified amount of tokens. allowance{" "}
+          contract can access the specified amount of tokens.
+          allowance {allowance} amount {amount}
         </p>
         {!isApproved && (
           <Button

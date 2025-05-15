@@ -10,7 +10,7 @@ import { erc20Abi } from "viem";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 
 interface ApproveTransactionProps {
-  quoteTokenAddress: `0x${string}`;
+  baseTokenAddress: `0x${string}`;
   pairAddress: `0x${string}`;
   amount: number;
   onApproveSuccess: () => void;
@@ -21,7 +21,7 @@ interface ApproveTransactionProps {
 }
 
 const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
-  quoteTokenAddress,
+  baseTokenAddress,
   pairAddress,
   amount,
   onApproveSuccess,
@@ -39,10 +39,10 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
     query: {
       select(data) {
         if (data.status === "success") {
-          toast.success("Place limit order successfully.");
           onApproveSuccess();
+          toast.success("Approve token successfully.");
         } else {
-          toast.error("Failed to place limit order.");
+          toast.error("Failed to approve token.");
           onApproveError();
         }
         setTxHash("");
@@ -61,7 +61,7 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
   const handleApprove = useCallback(() => {
     writeContract(
       {
-        address: quoteTokenAddress,
+        address: baseTokenAddress,
         abi: erc20Abi,
         functionName: "approve",
         args: [pairAddress, BigInt(amount)],
@@ -76,7 +76,7 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
         },
       }
     );
-  }, [writeContract, quoteTokenAddress, pairAddress, amount, onApproveError]);
+  }, [writeContract, baseTokenAddress, pairAddress, amount, onApproveError]);
 
   return (
     <div className="relative pl-10 pb-12">
@@ -94,8 +94,8 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
           <h3 className="text-base font-medium">Approve Token</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Approve the token transfer for the limit order, ensuring that the
-          contract can access the specified amount of tokens. allowance{" "}
+          Approve the token transfer for the market order, ensuring that the
+          contract can access the specified amount of tokens.
         </p>
         {!isApproved && (
           <Button

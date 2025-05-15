@@ -99,10 +99,16 @@ const Header = () => {
               </>
             )}
             <div className="flex items-center">
-              <Button variant="ghost" size="icon">
-                <GithubIcon />
-              </Button>
-              <Button variant="ghost" size="icon">
+              <a
+                href="https://github.com/akbaridria/hive-app"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button variant="ghost" size="icon">
+                  <GithubIcon />
+                </Button>
+              </a>
+              <Button variant="ghost" size="icon" disabled>
                 <BookOpenTextIcon />
               </Button>
             </div>

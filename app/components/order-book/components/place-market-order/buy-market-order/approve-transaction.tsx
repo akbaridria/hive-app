@@ -39,10 +39,10 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
     query: {
       select(data) {
         if (data.status === "success") {
-          toast.success("Place limit order successfully.");
           onApproveSuccess();
+          toast.success("Approve token successfully.");
         } else {
-          toast.error("Failed to place limit order.");
+          toast.error("Failed to approve token.");
           onApproveError();
         }
         setTxHash("");
@@ -94,8 +94,8 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
           <h3 className="text-base font-medium">Approve Token</h3>
         </div>
         <p className="text-sm text-muted-foreground">
-          Approve the token transfer for the limit order, ensuring that the
-          contract can access the specified amount of tokens. allowance{" "}
+          Approve the token transfer for the market order, ensuring that the
+          contract can access the specified amount of tokens.
         </p>
         {!isApproved && (
           <Button
