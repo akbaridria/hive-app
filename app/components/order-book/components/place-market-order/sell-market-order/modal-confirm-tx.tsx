@@ -115,12 +115,12 @@ const ModalConfirmationTx: React.FC<IModalConfirmationTxProps> = ({
             <div className="grid grid-cols-2 gap-2">
               <div className="text-sm text-muted-foreground">From amount</div>
               <div className="text-sm font-medium text-right">
-                {formatCurrency(amount || 0)} {selectedPair?.quoteToken.symbol}
+                {formatCurrency(amount || 0)} {selectedPair?.baseToken.symbol}
               </div>
               <div className="text-sm text-muted-foreground">To amount</div>
               <div className="text-sm font-medium text-right">
                 ~ {formatCurrency(toAmount || 0)}{" "}
-                {selectedPair?.baseToken.symbol}
+                {selectedPair?.quoteToken.symbol}
               </div>
             </div>
           </div>
