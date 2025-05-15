@@ -44,6 +44,9 @@ const BuyLimitOrder = () => {
         args: [address!, selectedPair?.address as `0x${string}`],
       },
     ],
+    query: {
+      refetchInterval: 3000,
+    },
   });
 
   useMemo(() => {

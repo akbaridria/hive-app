@@ -21,6 +21,11 @@ const config = {
       symbol: "DUMMYY",
       ca: "0x37EA5Ef2F2685254E175BB2A8F36c3F0c7B4058A",
     },
+    lisk: {
+      name: "Lisk",
+      symbol: "LSK",
+      ca: "0x8a21CF9Ba08Ae709D64Cb25AfAA951183EC9FF6D",
+    }
   },
 };
 

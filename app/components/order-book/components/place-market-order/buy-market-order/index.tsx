@@ -30,6 +30,9 @@ const BuyMarketOrder = () => {
     abi: erc20Abi,
     functionName: "balanceOf",
     args: [address!],
+    query: {
+      refetchInterval: 3000,
+    },
   });
 
   const idrxAmount = useMemo(() => {

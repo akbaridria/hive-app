@@ -17,7 +17,7 @@ export const TokenIcon = ({
         <img
           src={imageUrl}
           alt="Token"
-          className="rounded-full object-cover"
+          className="rounded-full object-cover bg-white"
           style={{ width: size, height: size }}
         />
       );

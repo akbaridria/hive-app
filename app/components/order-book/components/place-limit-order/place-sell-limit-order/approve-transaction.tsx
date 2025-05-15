@@ -96,7 +96,6 @@ const ApproveTransaction: React.FC<ApproveTransactionProps> = ({
         <p className="text-sm text-muted-foreground">
           Approve the token transfer for the limit order, ensuring that the
           contract can access the specified amount of tokens.
-          allowance {allowance} amount {amount}
         </p>
         {!isApproved && (
           <Button

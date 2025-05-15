@@ -9,7 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import type { PoolInfo } from "../types";
 import { useEffect, useMemo, useState } from "react";
 import { useAppContext } from "../context/app";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import { SearchX, Star, Coins } from "lucide-react";
 import { getItem } from "@/lib/local-storage";
@@ -78,35 +78,38 @@ const ListPair: React.FC<ListPairProps> = ({ listPools }) => {
       </div>
       <ScrollArea className="h-[calc(100vh_-_243px)] overflow-y-auto">
         {displayedPools.length > 0 ? (
-          displayedPools.map((item, index) => {
-            return (
-              <div
-                key={index}
-                className={cn(
-                  "flex items-center justify-between py-2 px-4 border-b border-dashed cursor-pointer hover:bg-accent/50 transition-colors",
-                  {
-                    "bg-accent/50":
-                      !!selectedPair &&
-                      selectedPair.baseToken.address === item.baseToken.address,
-                  }
-                )}
-                onClick={() => setSelectedPair(item)}
-              >
-                <div className="flex items-center gap-2">
-                  <TokenIcon address={item.baseToken.address} />
-                  <div className="font-semibold tracking-wider text-sm">
-                    {item.baseToken.symbol} / {item.quoteToken.symbol}
+          displayedPools
+            .sort((a, b) => Number(b.latestPrice) - Number(a.latestPrice))
+            .map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    "flex items-center justify-between py-2 px-4 border-b border-dashed cursor-pointer hover:bg-accent/50 transition-colors",
+                    {
+                      "bg-accent/50":
+                        !!selectedPair &&
+                        selectedPair.baseToken.address ===
+                          item.baseToken.address,
+                    }
+                  )}
+                  onClick={() => setSelectedPair(item)}
+                >
+                  <div className="flex items-center gap-2">
+                    <TokenIcon address={item.baseToken.address} />
+                    <div className="font-semibold tracking-wider text-sm">
+                      {item.baseToken.symbol} / {item.quoteToken.symbol}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-right">Latest Price</div>
+                    <div className="font-bold tracking-wider text-right">
+                      {formatCurrency(Number(item.latestPrice))}
+                    </div>
                   </div>
                 </div>
-                <div>
-                  <div className="text-xs text-right">Latest Price</div>
-                  <div className="font-bold tracking-wider text-right">
-                    {item.latestPrice}
-                  </div>
-                </div>
-              </div>
-            );
-          })
+              );
+            })
         ) : (
           <div className="flex flex-col items-center justify-center h-full p-6 text-center">
             {search ? (

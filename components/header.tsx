@@ -183,7 +183,7 @@ const ButtonFaucet = () => {
             setSelectedToken(value);
           }}
         >
-          {listTokens.map((token) => (
+          {listTokens.filter((item) => item.symbol !== 'LSK').map((token) => (
             <div key={token.ca} className="flex items-center space-x-2">
               <RadioGroupItem value={token.ca} id={token.ca} />
               <Label htmlFor={token.ca}>{token.name}</Label>
