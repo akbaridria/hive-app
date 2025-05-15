@@ -49,7 +49,7 @@ const OrderBook = () => {
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div className="text-muted-foreground">Price(IDRX)</div>
-            <div className="text-muted-foreground text-right">Amount(BTC)</div>
+            <div className="text-muted-foreground text-right">Amount({selectedPair?.baseToken?.symbol})</div>
           </div>
           {data.bids.map((bid, index) => {
             const volumePercentage =
