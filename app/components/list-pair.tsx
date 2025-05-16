@@ -44,10 +44,10 @@ const ListPair: React.FC<ListPairProps> = ({ listPools }) => {
   }, [filteredPools, selectedTab]);
 
   useEffect(() => {
-    if (!selectedPair && listPools.length > 0) {
-      setSelectedPair(listPools[0]);
+    if (!selectedPair && displayedPools.length > 0) {
+      setSelectedPair(displayedPools?.[0]);
     }
-  }, [listPools, selectedPair, setSelectedPair]);
+  }, [displayedPools, selectedPair, setSelectedPair]);
 
   return (
     <ResizablePanel defaultSize={20}>
